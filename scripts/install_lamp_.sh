@@ -29,5 +29,4 @@ cp ../php/index.php /var/www/html
 
 
 # Cambiamos usuario y propietario de var/www/html
-
 chown -R www-data:www-data /var/www/html
