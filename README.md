@@ -65,5 +65,73 @@ En este script se realiza la instalación de LAMP en la última version de **ubu
  ```bash
  sudo ./install_lamp.sh
  ```
-
+## .env
+```bash
+DB_NAME=lamp_db
+DB_USER=lamp_user
+DB_PASS=lamp_pass
+```
 ## Deploy.sh
+```bash
+#!/bin/bash
+ 
+# Para mostrar los comandos que se van ejecutando
+set -x
+
+# Actualizamos la lista de repositorios
+ apt update
+# ACtualizamos los paquetes del sistema
+# apt upgrade -y
+
+#importamos .env
+source .env
+
+#borramos instalaciones previas
+rm -rf /tmp/iaw-practica-lamp
+
+#clonamos el repositorio de la aplicacion
+git clone https://github.com/josejuansanchez/iaw-practica-lamp /tmp/iaw-practica-lamp
+
+```
+Se realizan los pasos premeditarios:
+1. Actualizar repositorios
+2. Se importa .env
+3. Se borran instalaciones previas en el directorio temporal por defecto de ubuntu para que no de error
+4. Clonamos el repositorio de la aplicación web
+```
+
+#movemos el codigo fuente de la app /var/www/html
+mv /tmp/iaw-practica-lamp/src/* /var/www/html
+
+#configuramos el archivo config.php
+sed -i "s/database_name_here/$DB_NAME/" /var/www/html/config.php
+sed -i "s/username_here/$DB_USER/" /var/www/html/config.php
+sed -i "s/password_here/$DB_PASS/" /var/www/html/config.php
+
+#modificamos el nombre de la bd en el script
+sed -i "s/lamp_db/$DB_NAME/" /tmp/iaw-practica-lamp/db/database.sql
+```
+1. Se mueve el codigo fuente del repositorio temporal al repositorio final
+2. Utilizando el comando sed configuramos el archivo config.php ya que por defecto tiene nombre de bd, nombre de usuario y contraseña de prueba  
+  2.1 En el archivo config.php donde la cadena "database_name_here" se cambia a la variable $DB_NAME
+   
+   2.2 En el archivo config.php donde la cadena "username_here" se cambia a la variable $DB_USER
+   
+   2.3 En el archivo config.php donde la cadena "password_here" se cambia a la variable $DB_PASS
+   
+3. Se hace lo mismo en el archivo database.sql
+   
+   3.1 En el archivo database.sql donde la cadena "lamp_db" se cambia a la variable $DB_NAME, que en nuestro caso se llamaba de por si lamp_db pero por si queremos cambiar la base de datos en el futuro
+      
+```bash
+#importamos la BD
+mysql -u root < /tmp/iaw-practica-lamp/db/database.sql
+
+#creamos el usuario de la bd y le asignamos privilegios
+mysql -u root <<< "DROP USER IF EXISTS $DB_USER@'%'";
+mysql -u root <<< "CREATE USER $DB_USER@'%' IDENTIFIED BY '$DB_PASS'";
+mysql -u root <<< "GRANT ALL PRIVILEGES ON $DB_NAME.* TO $DB_USER@'%'";
+
+```
+1. Se importa la base de datos con el comando mysql y el parametro '<' para que utilice las instrucciones dentro del archivo
+2. Se crea el usuario y se le asigna todos los privilegios en la base de datos utilizando el comando mysql y el parametro '<<<' para inyectar directamente una cadena de instrucciones
