@@ -32,7 +32,7 @@ sed -i "s/lamp_db/$DB_NAME/" /tmp/iaw-practica-lamp/db/database.sql
 #importamos la BD
 mysql -u root < /tmp/iaw-practica-lamp/db/database.sql
 
-#!/bin/bash
+
 #creamos el usuario de la bd y le asignamos privilegios
 mysql -u root <<< "DROP USER IF EXISTS $DB_USER@'%'";
 mysql -u root <<< "CREATE USER $DB_USER@'%' IDENTIFIED BY '$DB_PASS'";
